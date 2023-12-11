@@ -1,0 +1,3 @@
+# One-liner which outputs which processes use the most RAM, the users that have started them and the locations of the scripts:
+
+ps -eo pid,user,%mem,command --sort=-%mem | head -n 6 | awk 'NR>1 {print "Process:", $1, "User:", $2, "Script:", system("readlink -f /proc/"$1"/exe")}'

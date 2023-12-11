@@ -1,0 +1,11 @@
+#outputs which processes use the most RAM, the users that have started them and the locations of the scripts asks if you want to kill the processes:
+
+processes_info=$(ps -eo pid,user,%mem,command --sort=-%mem | head -n 6 | awk 'NR>1 {print "Process:", $1, "User:", $2, "Script:", system("readlink -f /proc/"$1"/exe")}')
+
+echo "$processes_info"
+
+read -p "Do you want to kill these processes? (yes/no): " answer
+
+if [[ $answer == "yes" ]]; then
+    echo "$processes_info" | awk '{print $2}' | xargs -r kill -15
+fi
