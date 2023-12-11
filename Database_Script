@@ -1,0 +1,26 @@
+* Script that shows MySQL Queries using the most RAM, Users, and Scripts
+#!/bin/bash
+
+echo "MySQL Queries using the most RAM, Users, and Scripts"
+echo "---------------------------------------------------"
+
+query_results=$(mysql -e "SHOW FULL PROCESSLIST")
+query_list=$(echo "$query_results" | awk '{print $3, $4, $8, $1}' | sort -nrk3 | head -n 6 | awk 'NR>1 {print "Query:", $1, "User:", $2, "Script:", $3}')
+
+users_who_generated=$(mysql -e "SELECT DISTINCT USER FROM information_schema.PROCESSLIST WHERE COMMAND = 'Query' AND INFO IS NOT NULL;")
+scripts_that_started=$(mysql -e "SELECT DISTINCT HOST, INFO FROM information_schema.PROCESSLIST WHERE COMMAND = 'Query' AND INFO IS NOT NULL;")
+
+echo "$query_list"
+echo "These users have generated the queries:"
+echo "$users_who_generated"
+echo "These scripts have started the queries:"
+echo "$scripts_that_started"
+
+read -p "Do you want to kill these queries? (yes/no): " answer
+
+if [[ $answer == "yes" ]]; then
+    mysql -e "KILL QUERY $answer;"
+    echo "Queries killed."
+else
+    echo "Queries not killed."
+fi
